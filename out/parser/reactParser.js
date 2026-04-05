@@ -83,7 +83,6 @@ function parseReactState(code) {
                 if (t.isIdentifier(callee)) {
                     const state = states.find(s => s.setter === callee.name);
                     if (state) {
-                        // Check if this call is inside a hook like useEffect
                         let parent = path.parentPath;
                         let isInsideSafeHook = false;
                         let isInsideEventHandler = false;

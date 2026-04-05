@@ -3,6 +3,7 @@
   "displayName": "React State Visualizer",
   "description": "Visualize React states (useState, useReducer) in a sidebar dashboard.",
   "version": "0.0.1",
+  "publisher": "Shuvroto Kumar",
   "engines": {
     "vscode": "^1.75.0"
   },
