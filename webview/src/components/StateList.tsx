@@ -2,14 +2,17 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Target, Activity, AlertTriangle, ChevronRight } from 'lucide-react';
 
-interface ReactState {
+export interface ReactState {
     name: string;
     setter: string;
     type: 'useState' | 'useReducer';
     initialValue: string;
     line: number;
     column: number;
+    endLine: number;
+    endColumn: number;
     isUnused: boolean;
+    hasPotentialInfiniteLoop: boolean;
 }
 
 export function StateList({ states, onJump }: { states: ReactState[], onJump: (s: ReactState) => void }) {
@@ -25,7 +28,9 @@ export function StateList({ states, onJump }: { states: ReactState[], onJump: (s
                         transition={{ delay: idx * 0.05 }}
                         onClick={() => onJump(state)}
                         className={`group relative p-4 rounded-xl backdrop-blur-lg border border-white/10 transition-all cursor-pointer overflow-hidden ${
-                            state.isUnused ? 'hover:border-yellow-500/50 hover:shadow-[0_0_20px_rgba(234,179,8,0.1)]' : 'hover:border-blue-500/50 hover:shadow-[0_0_20px_rgba(59,130,246,0.1)]'
+                            state.hasPotentialInfiniteLoop ? 'border-red-500/50 shadow-[0_0_20px_rgba(239,68,68,0.1)]' :
+                            state.isUnused ? 'hover:border-yellow-500/50 hover:shadow-[0_0_20px_rgba(234,179,8,0.1)]' : 
+                            'hover:border-blue-500/50 hover:shadow-[0_0_20px_rgba(59,130,246,0.1)]'
                         }`}
                         style={{
                             background: 'rgba(255, 255, 255, 0.03)'
@@ -33,12 +38,18 @@ export function StateList({ states, onJump }: { states: ReactState[], onJump: (s
                     >
                         {/* Background Gradient */}
                         <div className={`absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-gradient-to-br ${
-                            state.isUnused ? 'from-yellow-500/20 to-transparent' : 'from-blue-500/20 to-transparent'
+                            state.hasPotentialInfiniteLoop ? 'from-red-500/20 to-transparent' :
+                            state.isUnused ? 'from-yellow-500/20 to-transparent' : 
+                            'from-blue-500/20 to-transparent'
                         }`} />
 
                         <div className="flex items-start justify-between">
                             <div className="flex items-center gap-3">
-                                <div className={`p-2 rounded-lg ${state.isUnused ? 'bg-yellow-500/10 text-yellow-500' : 'bg-blue-500/10 text-blue-500'}`}>
+                                <div className={`p-2 rounded-lg ${
+                                    state.hasPotentialInfiniteLoop ? 'bg-red-500/10 text-red-500' :
+                                    state.isUnused ? 'bg-yellow-500/10 text-yellow-500' : 
+                                    'bg-blue-500/10 text-blue-500'
+                                }`}>
                                     {state.type === 'useState' ? <Target className="w-4 h-4" /> : <Activity className="w-4 h-4" />}
                                 </div>
                                 <div>
@@ -64,6 +75,12 @@ export function StateList({ states, onJump }: { states: ReactState[], onJump: (s
                                 <div className="bg-yellow-500/10 text-yellow-500 px-2 py-0.5 rounded text-[10px] flex items-center gap-1">
                                     <AlertTriangle className="w-3 h-3" />
                                     Unused
+                                </div>
+                            )}
+                            {state.hasPotentialInfiniteLoop && (
+                                <div className="bg-red-500/10 text-red-500 px-2 py-0.5 rounded text-[10px] flex items-center gap-1">
+                                    <AlertTriangle className="w-3 h-3" />
+                                    Potential Infinite Loop!
                                 </div>
                             )}
                         </div>

@@ -11,7 +11,10 @@ interface ReactState {
     initialValue: string;
     line: number;
     column: number;
+    endLine: number;
+    endColumn: number;
     isUnused: boolean;
+    hasPotentialInfiniteLoop: boolean;
 }
 
 const vscode = (window as any).acquireVsCodeApi();
