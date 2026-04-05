@@ -2,7 +2,7 @@
   "name": "react-state-visualizer",
   "displayName": "React State Visualizer",
   "description": "Visualize React states (useState, useReducer) in a sidebar dashboard.",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "publisher": "Shuvroto Kumar",
   "repository": {
     "type": "git",
@@ -17,6 +17,9 @@
     "Programming Languages"
   ],
   "main": "./dist/extension.js",
+  "activationEvents": [
+    "*"
+  ],
   "contributes": {
     "viewsContainers": {
       "activitybar": [
@@ -66,22 +69,23 @@
     "build": "npm run build:extension && npm run build:webview"
   },
   "devDependencies": {
+    "@babel/parser": "^7.21.0",
+    "@babel/traverse": "^7.21.0",
+    "@babel/types": "^7.21.0",
+    "@types/babel__traverse": "^7.18.3",
     "@types/node": "16.x",
     "@types/vscode": "^1.75.0",
     "@typescript-eslint/eslint-plugin": "^5.53.0",
     "@typescript-eslint/parser": "^5.53.0",
+    "esbuild": "^0.17.11",
     "eslint": "^8.34.0",
     "typescript": "^4.9.5",
-    "vite": "^4.1.0",
-    "esbuild": "^0.17.11",
-    "@babel/parser": "^7.21.0",
-    "@babel/traverse": "^7.21.0",
-    "@babel/types": "^7.21.0",
-    "@types/babel__traverse": "^7.18.3"
+    "vite": "^4.1.0"
   },
   "dependencies": {
     "@babel/parser": "^7.21.0",
     "@babel/traverse": "^7.21.0",
-    "@babel/types": "^7.21.0"
+    "@babel/types": "^7.21.0",
+    "@vscode/vsce": "^3.7.1"
   }
 }

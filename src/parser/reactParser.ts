@@ -17,7 +17,7 @@ export interface ReactState {
 
 export function parseReactState(code: string): ReactState[] {
     const states: ReactState[] = [];
-    
+
     try {
         const ast = parser.parse(code, {
             sourceType: 'module',
@@ -37,7 +37,7 @@ export function parseReactState(code: string): ReactState[] {
             CallExpression(path) {
                 const callee = path.node.callee;
                 let hookName: string | null = null;
-                
+
                 if (t.isIdentifier(callee)) {
                     hookName = callee.name;
                 } else if (t.isMemberExpression(callee) && t.isIdentifier(callee.property)) {
@@ -46,14 +46,14 @@ export function parseReactState(code: string): ReactState[] {
 
                 if (hookName === 'useState' || hookName === 'useReducer') {
                     const parent = path.parentPath.node;
-                    
+
                     if (t.isVariableDeclarator(parent) && t.isArrayPattern(parent.id)) {
                         const elements = parent.id.elements;
-                        
+
                         if (elements.length >= 1 && t.isIdentifier(elements[0])) {
                             const name = elements[0].name;
                             const setter = elements.length >= 2 && t.isIdentifier(elements[1]) ? elements[1].name : '';
-                            const initialValue = path.node.arguments.length > 0 
+                            const initialValue = path.node.arguments.length > 0
                                 ? code.substring(path.node.arguments[0].start!, path.node.arguments[0].end!)
                                 : 'undefined';
 
@@ -72,7 +72,7 @@ export function parseReactState(code: string): ReactState[] {
                         }
                     }
                 }
-                
+
                 // Infinite Loop Detection
                 if (t.isIdentifier(callee)) {
                     const state = states.find(s => s.setter === callee.name);
