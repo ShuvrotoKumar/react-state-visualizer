@@ -1,0 +1,78 @@
+{
+  "name": "react-state-visualizer",
+  "displayName": "React State Visualizer",
+  "description": "Visualize React states (useState, useReducer) in a sidebar dashboard.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Visualization",
+    "Programming Languages"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "react-state-visualizer-sidebar",
+          "title": "React State",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "react-state-visualizer-sidebar": [
+        {
+          "type": "webview",
+          "id": "react-state-visualizer.sidebar",
+          "name": "State Dashboard",
+          "contextualTitle": "React State"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "react-state-visualizer.refresh",
+        "title": "Refresh State Scan",
+        "icon": "$(refresh)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "react-state-visualizer.refresh",
+          "when": "view == react-state-visualizer.sidebar",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "build": "vite build --outDir dist"
+  },
+  "devDependencies": {
+    "@types/node": "16.x",
+    "@types/vscode": "^1.75.0",
+    "@typescript-eslint/eslint-plugin": "^5.53.0",
+    "@typescript-eslint/parser": "^5.53.0",
+    "eslint": "^8.34.0",
+    "typescript": "^4.9.5",
+    "vite": "^4.1.0",
+    "@babel/parser": "^7.21.0",
+    "@babel/traverse": "^7.21.0",
+    "@babel/types": "^7.21.0",
+    "@types/babel__traverse": "^7.18.3"
+  },
+  "dependencies": {
+    "@babel/parser": "^7.21.0",
+    "@babel/traverse": "^7.21.0",
+    "@babel/types": "^7.21.0"
+  }
+}
