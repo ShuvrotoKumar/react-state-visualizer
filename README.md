@@ -39,7 +39,7 @@ This extension currently does not require any additional configuration. It works
 
 ## Release Notes
 
-### 0.0.1
+### 1.0.2
 Initial release of React State Visualizer.
 
 ---

@@ -45,6 +45,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                     this.scanActiveFile();
                     break;
                 }
+                case "scanWorkspace": {
+                    this.scanWorkspace();
+                    break;
+                }
             }
         });
     }
@@ -58,7 +62,37 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
         const text = editor.document.getText();
         const states = parseReactState(text);
-        this._view?.webview.postMessage({ type: 'update', value: states });
+        this._view?.webview.postMessage({ type: 'update', value: states, fileName: editor.document.fileName });
+    }
+
+    public async scanWorkspace() {
+        vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: "Scanning Workspace for React States...",
+            cancellable: false
+        }, async (progress) => {
+            const files = await vscode.workspace.findFiles('**/*.{js,jsx,ts,tsx}', '**/node_modules/**');
+            let allStates: any[] = [];
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const doc = await vscode.workspace.openTextDocument(file);
+                if (doc.languageId === "javascriptreact" || doc.languageId === "typescriptreact") {
+                    const text = doc.getText();
+                    const states = parseReactState(text);
+                    if (states.length > 0) {
+                        allStates.push({
+                            file: file.fsPath,
+                            fileName: file.path.split('/').pop(),
+                            states
+                        });
+                    }
+                }
+                progress.report({ increment: (100 / files.length), message: `Parsed ${file.path.split('/').pop()}` });
+            }
+
+            this._view?.webview.postMessage({ type: 'workspaceUpdate', value: allStates });
+        });
     }
 
     private _getHtmlForWebview(webview: vscode.Webview) {
