@@ -2,7 +2,7 @@
   "name": "react-state-visualizer",
   "displayName": "React State Visualizer",
   "description": "Visualize React states (useState, useReducer) in a sidebar dashboard.",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "publisher": "Shuvroto-Kumar",
   "repository": {
     "type": "git",
