@@ -54,9 +54,9 @@ export function StateList({
                             exit={{ opacity: 0, scale: 0.9 }}
                             transition={{ duration: 0.3, delay: idx * 0.03 }}
                             className={`group relative p-4 rounded-2xl backdrop-blur-xl border transition-all cursor-pointer overflow-hidden ${
-                                state.hasPotentialInfiniteLoop ? 'bg-red-500/5 border-red-500/30 shadow-[0_0_20px_rgba(239,68,68,0.05)]' :
-                                state.isUnused ? 'bg-yellow-500/5 border-yellow-500/30' : 
-                                state.isDerived ? 'bg-purple-500/5 border-purple-500/30' :
+                                state.insightCategory === 'Warning' ? 'bg-red-500/5 border-red-500/30 shadow-[0_0_20px_rgba(239,68,68,0.05)]' :
+                                state.insightCategory === 'Performance' ? 'bg-yellow-500/5 border-yellow-500/30 shadow-[0_0_20px_rgba(245,158,11,0.05)]' : 
+                                state.insightCategory === 'Best Practice' ? 'bg-blue-500/5 border-blue-500/30' :
                                 isPinned ? 'bg-blue-500/10 border-blue-500/30 ring-1 ring-blue-500/20' :
                                 'bg-white/5 border-white/10 hover:border-blue-500/50'
                             }`}
@@ -68,8 +68,8 @@ export function StateList({
                             <div className="flex items-start justify-between relative z-10">
                                 <div className="flex items-center gap-4">
                                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${
-                                        state.hasPotentialInfiniteLoop ? 'bg-red-500/20 text-red-400' :
-                                        state.isUnused ? 'bg-yellow-500/20 text-yellow-400' : 
+                                        state.insightCategory === 'Warning' ? 'bg-red-500/20 text-red-400' :
+                                        state.insightCategory === 'Performance' ? 'bg-yellow-500/20 text-yellow-400' : 
                                         state.isDerived ? 'bg-purple-500/20 text-purple-400' :
                                         'bg-blue-500/20 text-blue-400'
                                     }`}>
@@ -87,6 +87,15 @@ export function StateList({
                                                     Derived
                                                 </span>
                                             )}
+                                            {state.complexityScore !== undefined && (
+                                                <span className={`text-[9px] px-1.5 py-0.5 rounded border font-mono font-bold ${
+                                                    state.complexityScore > 40 ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                                                    state.complexityScore > 15 ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
+                                                    'bg-green-500/10 text-green-400 border-green-500/20 opacity-40'
+                                                }`}>
+                                                    {state.complexityScore}
+                                                </span>
+                                            )}
                                             {isPinned && <Pin className="w-3 h-3 text-blue-400 fill-blue-400" />}
                                         </div>
                                         <p className="text-[11px] opacity-40 font-mono flex items-center gap-1.5">
@@ -96,6 +105,15 @@ export function StateList({
                                 </div>
                                 <div className="flex flex-col items-end gap-1">
                                     <div className="flex gap-1">
+                                        {state.insightCategory && (
+                                            <div className={`p-1.5 rounded-lg border flex items-center justify-center ${
+                                                state.insightCategory === 'Warning' ? 'bg-red-500/10 border-red-500/20 text-red-400' :
+                                                state.insightCategory === 'Performance' ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500' :
+                                                'bg-blue-500/10 border-blue-500/20 text-blue-400'
+                                            }`}>
+                                                <AlertTriangle className="w-3 h-3" />
+                                            </div>
+                                        )}
                                         <button 
                                             onClick={(e) => {
                                                 e.stopPropagation();

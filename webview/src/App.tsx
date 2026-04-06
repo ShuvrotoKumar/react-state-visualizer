@@ -1,29 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { StateList } from './components/StateList';
+import { StateList, ReactState } from './components/StateList';
 import { Timeline } from './components/Timeline';
 import { FlowGraph } from './components/FlowGraph';
 import { LayoutDashboard, History, Share2, RefreshCw, Activity } from 'lucide-react';
-
-interface ReactState {
-    name: string;
-    setter: string;
-    type: 'useState' | 'useReducer';
-    initialValue: string;
-    line: number;
-    column: number;
-    endLine: number;
-    endColumn: number;
-    isUnused: boolean;
-    isSetterUnused: boolean;
-    usageCount: number;
-    setterUsageCount: number;
-    hasPotentialInfiniteLoop: boolean;
-    dispatch?: string;
-    actions?: string[];
-    isDerived: boolean;
-    derivedFrom?: string[];
-    suggestions: string[];
-}
 
 const vscode = (window as any).acquireVsCodeApi();
 
