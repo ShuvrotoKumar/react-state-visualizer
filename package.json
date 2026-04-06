@@ -36,7 +36,8 @@
           "type": "webview",
           "id": "react-state-visualizer.sidebar",
           "name": "State Dashboard",
-          "contextualTitle": "React State"
+          "contextualTitle": "React State",
+          "icon": "icon.png"
         }
       ]
     },

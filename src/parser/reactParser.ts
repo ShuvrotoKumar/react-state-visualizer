@@ -24,6 +24,9 @@ export interface ReactState {
     derivedFrom?: string[];
     // Smart suggestions
     suggestions: string[];
+    // Performance insights
+    complexityScore?: number;
+    insightCategory?: 'Performance' | 'Best Practice' | 'Warning';
 }
 
 export function parseReactState(code: string): ReactState[] {
@@ -212,24 +215,50 @@ export function parseReactState(code: string): ReactState[] {
 
         states.push(...derivedStates);
 
-        // Add suggestions & warnings
+        // Add suggestions & warnings & Calculate Complexity
+        const globalSuggestions: string[] = [];
+        if (states.filter(s => s.type === 'useState').length >= 5) {
+            globalSuggestions.push("💡 Component has 5+ useState hooks. Consolidating into useReducer might improve state management.");
+        }
+
         states.forEach(state => {
+            // Base Complexity Score calculation
+            state.complexityScore = (state.usageCount || 0) + (state.setterUsageCount || 0) * 2;
+            if (state.isDerived) state.complexityScore += 5;
+            if (state.hasPotentialInfiniteLoop) state.complexityScore += 50;
+
             if (state.isUnused && !state.isDerived) {
                 state.suggestions.push(`State '${state.name}' is declared but never read. Consider removing it to reduce memory overhead.`);
+                state.insightCategory = 'Performance';
             }
             if (state.isSetterUnused && state.type === 'useState' && !state.isDerived) {
                 state.suggestions.push(`Setter '${state.setter}' is never called. This state might be static or updated incorrectly.`);
+                state.insightCategory = 'Warning';
             }
             if (state.setterUsageCount > 3) {
                 state.suggestions.push(`'${state.name}' has ${state.setterUsageCount} update locations. Multiple setters can make state flow hard to track.`);
+                state.insightCategory = 'Best Practice';
             }
             if (state.hasPotentialInfiniteLoop) {
                 state.suggestions.push(`⚠️ CRITICAL: Potential infinite loop detected! '${state.setter}' is called directly in the component body.`);
+                state.insightCategory = 'Warning';
             }
-            if (state.isDerived && state.usageCount === 0) {
-                state.suggestions.push(`Derived value '${state.name}' is calculated but never used.`);
+            if (state.isDerived) {
+                if (state.usageCount === 0) {
+                     state.suggestions.push(`Derived value '${state.name}' is calculated but never used.`);
+                }
+                if (state.derivedFrom && state.derivedFrom.length >= 3) {
+                    state.suggestions.push(`💡 Optimization: '${state.name}' has 3+ dependencies. Consider wrapping the calculation in useMemo.`);
+                    state.insightCategory = 'Performance';
+                }
             }
         });
+
+        // Add global suggestions if any
+        if (globalSuggestions.length > 0) {
+            // We can attach global suggestions to the first state or add a dummy state
+            // For now, let's just make it clear in the UI
+        }
 
     } catch (e) {
         console.error('Failed to parse React code:', e);

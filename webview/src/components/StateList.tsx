@@ -20,81 +20,105 @@ export interface ReactState {
     isDerived: boolean;
     derivedFrom?: string[];
     suggestions: string[];
+    complexityScore?: number;
+    insightCategory?: 'Performance' | 'Best Practice' | 'Warning';
 }
 
-export function StateList({ states, onJump }: { states: ReactState[], onJump: (s: ReactState) => void }) {
+export function StateList({ 
+    states, 
+    onJump, 
+    pinnedNames = new Set(), 
+    onTogglePin 
+}: { 
+    states: ReactState[], 
+    onJump: (s: ReactState) => void,
+    pinnedNames?: Set<string>,
+    onTogglePin?: (name: string) => void
+}) {
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text);
-        // We could add a toast here
+        // Toast logic could go here
     };
 
     return (
         <div className="flex flex-col gap-4">
             <AnimatePresence mode="popLayout">
-                {states.map((state, idx) => (
-                    <motion.div
-                        key={`${state.name}-${idx}`}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        transition={{ duration: 0.3, delay: idx * 0.03 }}
-                        className={`group relative p-4 rounded-2xl backdrop-blur-xl border transition-all cursor-pointer overflow-hidden ${
-                            state.hasPotentialInfiniteLoop ? 'bg-red-500/5 border-red-500/30' :
-                            state.isUnused ? 'bg-yellow-500/5 border-yellow-500/30' : 
-                            state.isDerived ? 'bg-purple-500/5 border-purple-500/30' :
-                            'bg-white/5 border-white/10 hover:border-blue-500/50'
-                        }`}
-                        onClick={() => onJump(state)}
-                    >
-                        {/* Glow effect */}
-                        <div className="absolute -inset-px bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                {states.map((state, idx) => {
+                    const isPinned = pinnedNames.has(state.name);
+                    return (
+                        <motion.div
+                            key={`${state.name}-${idx}`}
+                            layout
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            transition={{ duration: 0.3, delay: idx * 0.03 }}
+                            className={`group relative p-4 rounded-2xl backdrop-blur-xl border transition-all cursor-pointer overflow-hidden ${
+                                state.hasPotentialInfiniteLoop ? 'bg-red-500/5 border-red-500/30 shadow-[0_0_20px_rgba(239,68,68,0.05)]' :
+                                state.isUnused ? 'bg-yellow-500/5 border-yellow-500/30' : 
+                                state.isDerived ? 'bg-purple-500/5 border-purple-500/30' :
+                                isPinned ? 'bg-blue-500/10 border-blue-500/30 ring-1 ring-blue-500/20' :
+                                'bg-white/5 border-white/10 hover:border-blue-500/50'
+                            }`}
+                            onClick={() => onJump(state)}
+                        >
+                            {/* Glow effect */}
+                            <div className="absolute -inset-px bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
-                        <div className="flex items-start justify-between relative z-10">
-                            <div className="flex items-center gap-4">
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${
-                                    state.hasPotentialInfiniteLoop ? 'bg-red-500/20 text-red-400' :
-                                    state.isUnused ? 'bg-yellow-500/20 text-yellow-400' : 
-                                    state.isDerived ? 'bg-purple-500/20 text-purple-400' :
-                                    'bg-blue-500/20 text-blue-400'
-                                }`}>
-                                    {state.isDerived ? <Layers className="w-5 h-5" /> : 
-                                     state.type === 'useState' ? <Target className="w-5 h-5" /> : 
-                                     <Activity className="w-5 h-5" />}
-                                </div>
-                                <div className="space-y-0.5">
-                                    <div className="flex items-center gap-2">
-                                        <h3 className="font-bold text-white group-hover:text-blue-400 transition-colors">
-                                            {state.name}
-                                        </h3>
-                                        {state.isDerived && (
-                                            <span className="text-[9px] bg-purple-500/20 text-purple-400 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-tighter">
-                                                Derived
-                                            </span>
-                                        )}
+                            <div className="flex items-start justify-between relative z-10">
+                                <div className="flex items-center gap-4">
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${
+                                        state.hasPotentialInfiniteLoop ? 'bg-red-500/20 text-red-400' :
+                                        state.isUnused ? 'bg-yellow-500/20 text-yellow-400' : 
+                                        state.isDerived ? 'bg-purple-500/20 text-purple-400' :
+                                        'bg-blue-500/20 text-blue-400'
+                                    }`}>
+                                        {state.isDerived ? <Layers className="w-5 h-5" /> : 
+                                        state.type === 'useState' ? <Target className="w-5 h-5" /> : 
+                                        <Activity className="w-5 h-5" />}
                                     </div>
-                                    <p className="text-[11px] opacity-40 font-mono flex items-center gap-1.5">
-                                        {state.setter || '(no setter)'}
-                                        {state.setter && (
-                                            <button 
-                                                onClick={(e) => { e.stopPropagation(); copyToClipboard(state.setter); }}
-                                                className="hover:text-white transition-colors"
-                                            >
-                                                <Copy className="w-3 h-3" />
-                                            </button>
-                                        )}
-                                    </p>
+                                    <div className="space-y-0.5">
+                                        <div className="flex items-center gap-2">
+                                            <h3 className="font-bold text-white group-hover:text-blue-400 transition-colors">
+                                                {state.name}
+                                            </h3>
+                                            {state.isDerived && (
+                                                <span className="text-[9px] bg-purple-500/20 text-purple-400 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-tighter">
+                                                    Derived
+                                                </span>
+                                            )}
+                                            {isPinned && <Pin className="w-3 h-3 text-blue-400 fill-blue-400" />}
+                                        </div>
+                                        <p className="text-[11px] opacity-40 font-mono flex items-center gap-1.5">
+                                            {state.setter || '(no setter)'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col items-end gap-1">
+                                    <div className="flex gap-1">
+                                        <button 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onTogglePin?.(state.name);
+                                            }}
+                                            className={`p-1.5 rounded-lg transition-all ${
+                                                isPinned ? 'bg-blue-500/20 text-blue-400 opacity-100' : 'bg-white/5 opacity-0 group-hover:opacity-100 hover:bg-white/10'
+                                            }`}
+                                        >
+                                            <Pin className={`w-3.5 h-3.5 ${isPinned ? 'fill-blue-400' : ''}`} />
+                                        </button>
+                                        <button 
+                                            onClick={(e) => { e.stopPropagation(); copyToClipboard(state.name); }}
+                                            className="p-1.5 bg-white/5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-white/10 transition-all text-white/40 hover:text-white"
+                                            title="Copy state name"
+                                        >
+                                            <Copy className="w-3.5 h-3.5" />
+                                        </button>
+                                        <ChevronRight className="w-4 h-4 opacity-40 group-hover:opacity-100 group-hover:translate-x-1 transition-all mt-1" />
+                                    </div>
+                                    <span className="text-[10px] font-mono opacity-20">L{state.line}</span>
                                 </div>
                             </div>
-                            <div className="flex flex-col items-end gap-1">
-                                <div className="flex gap-1">
-                                    <button className="p-1.5 bg-white/5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-white/10 transition-all">
-                                        <Pin className="w-3 h-3" />
-                                    </button>
-                                    <ChevronRight className="w-4 h-4 opacity-40 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-                                </div>
-                                <span className="text-[10px] font-mono opacity-20">L{state.line}</span>
-                            </div>
-                        </div>
 
                         {/* Metrics Bar */}
                         <div className="mt-4 flex items-center gap-3">
@@ -139,7 +163,7 @@ export function StateList({ states, onJump }: { states: ReactState[], onJump: (s
                             </div>
                         )}
                     </motion.div>
-                ))}
+                ); })}
             </AnimatePresence>
         </div>
     );
